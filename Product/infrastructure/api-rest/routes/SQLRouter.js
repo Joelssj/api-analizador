@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.sqlRouter = void 0;
+const express_1 = require("express");
+const ValidateSQLController_1 = require("../controllers/ValidateSQLController");
+const sqlRouter = (0, express_1.Router)();
+exports.sqlRouter = sqlRouter;
+const validateSQLController = new ValidateSQLController_1.ValidateSQLController();
+sqlRouter.post('/conectar', (req, res) => validateSQLController.checkConnection(req, res));
+sqlRouter.post('/analizar', (req, res) => validateSQLController.executeQuery(req, res));
+sqlRouter.post('/cerrar', (req, res) => validateSQLController.closeConnection(req, res));
