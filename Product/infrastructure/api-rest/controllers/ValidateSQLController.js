@@ -54,13 +54,28 @@ class ValidateSQLController {
     }
     executeQuery(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
-            const { query } = req.body;
-            if (!query) {
-                return res.status(400).json({ success: false, message: 'No SQL query provided.' });
+            var _a, _b;
+            const { query, table, id } = req.body;
+            if (!query && (!table || !id)) {
+                return res.status(400).json({ success: false, message: 'No SQL query or delete parameters provided.' });
             }
             if (!connection) {
                 return res.status(400).json({ success: false, message: 'Database connection is not established.' });
+            }
+            // Verificar si es una solicitud de eliminación
+            if (table && id) {
+                const deleteQuery = `DELETE FROM \`${table}\` WHERE id = ?`;
+                try {
+                    const [results] = yield connection.execute(deleteQuery, [id]);
+                    return res.json({ success: true, message: 'Record deleted successfully.', results });
+                }
+                catch (error) {
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Error deleting record.',
+                        error: (_a = error === null || error === void 0 ? void 0 : error.message) !== null && _a !== void 0 ? _a : 'Unknown error'
+                    });
+                }
             }
             if (!/;\s*$/.test(query)) {
                 return res.status(400).json({
@@ -84,7 +99,7 @@ class ValidateSQLController {
                 return res.status(500).json({
                     success: false,
                     message: 'Error executing SQL query.',
-                    error: (_a = error === null || error === void 0 ? void 0 : error.message) !== null && _a !== void 0 ? _a : 'Unknown error'
+                    error: (_b = error === null || error === void 0 ? void 0 : error.message) !== null && _b !== void 0 ? _b : 'Unknown error'
                 });
             }
         });
